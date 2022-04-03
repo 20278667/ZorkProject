@@ -9,26 +9,57 @@ Room* rooms[9];
 //flags
 bool input = false;
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    w = new MainWindow();
-    w->show();
-    ZorkUL temp;
-    temp.play();
-    return a.exec();
-}
-
 //overloaded operator << for ease of sending data to MainWindow w for display.
 inline MainWindow* operator<< (MainWindow *m, QString s) {
     m->output(s);
     return m;
 }
 
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+    w = new MainWindow();
+    w->show();
+    ZorkUL temp;
+    thread t1(&ZorkUL::play, temp);
+    int i = a.exec();
+    t1.join();
+    return i;
+}
+
+
 //constructor
 ZorkUL::ZorkUL() {
     createRooms();
 }
+
+//main game loop
+void ZorkUL::play() {
+    w << QString::fromStdString(to_string(w->finished)) + QString("\n");
+    w << QString::fromStdString(to_string(w->canPlay)) + QString("\n");
+    w << QString::fromStdString(to_string(w->input)) + QString("\n");
+    while(!w->finished) {
+        if (w->canPlay) {
+            w->canPlay = false;
+                if (w->input) {
+                    w->input = false;
+                    // Create pointer to command and give it a command.
+                    Command* command = parser.getCommand(w->latestInput);
+                    if (!(command->getCommandWord().empty())) {
+                        // Pass dereferenced command and check for end of game.
+                        w->finished = processCommand(*command);
+                    }
+                    // Free the memory allocated by "parser.getCommand()"
+                    //   with ("return new Command(...)")
+                    delete command;
+                }
+        }
+        this_thread::sleep_for(chrono::milliseconds(1000));
+    }
+    w << QString("\n end \n");
+    w << QString("\n");
+}
+
 
 void ZorkUL::createRooms()  {
 
@@ -58,43 +89,13 @@ void ZorkUL::createRooms()  {
     rooms[8]->setExits(NULL, rooms[3], NULL, NULL);
 
     currentRoom = rooms[0];
-}
-
-/**
- *  Main play routine.  Loops until end of play.
- */
-void ZorkUL::play() {
     printWelcome();
-    Command* command = parser.getCommand("go west");
-    processCommand(*command);
-    // Enter the main command loop.  Here we repeatedly read commands and
-    // execute them until the ZorkUL game is over.
-
-    bool finished = true;
-    while (!finished) {
-        if (w->input) {
-            w->input = false;
-            // Create pointer to command and give it a command.
-            Command* command = parser.getCommand(w->latestInput);
-            if (!(command->getCommandWord().empty())) {
-                // Pass dereferenced command and check for end of game.
-                finished = processCommand(*command);
-            }
-            // Free the memory allocated by "parser.getCommand()"
-            //   with ("return new Command(...)")
-            delete command;
-        }
-    }
-    //std::string and QString::QString are both viable options for overloaded function MainWindow.output();
-    //QString is the preferred output type over string, since output() converts strings to QStrings for processing.
-    w << QString("\n end \n");
-    w << QString("\n");
 }
 
 void ZorkUL::printWelcome() {
     w << QString("start\n");
     w << QString("info for help\n");
-    w << QString::fromStdString(currentRoom->longDescription());
+    w << QString::fromStdString(currentRoom->longDescription()) + "\n";
 }
 
 /** COMMANDS **/

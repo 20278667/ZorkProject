@@ -7,23 +7,30 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     input = false;
-    /*
-    push_button2 = new QPushButton(this);
-    push_button2->setText("Click");
-    push_button2->setGeometry(QRect(QPoint(0, 0), QSize(100, 50)));
-    connect(push_button2, SIGNAL(clicked()), this, SLOT(on_pushButton_clicked()));*/
+    finished = false;
+    canPlay = false;
+
+    auto timer = new QTimer(parent);
+    connect(timer, SIGNAL(timeout()), this, SLOT(updatePlay()) );
+    timer->start();
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
 
+//Slots
 void MainWindow::on_pushButton_clicked() {
     input = true;
     latestInput = ui->dialogue->toPlainText();
     ui->dialogue->clear();
     output("> " + latestInput + "\n");
 }
+
+void MainWindow::updatePlay() {
+    canPlay = true;
+}
+
 
 //inline display functions
 inline void MainWindow::output(std::string out) {

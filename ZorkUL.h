@@ -6,8 +6,11 @@
 #include "Room.h"
 #include "item.h"
 #include "mainwindow.h"
+#include <QTimer>
 #include <iostream>
 #include <string>
+#include <thread>
+#include <chrono>
 #include <QApplication>
 using namespace std;
 

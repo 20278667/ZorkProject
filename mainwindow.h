@@ -4,8 +4,8 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QObject>
+#include <QTimer>
 #include <string>
-#include <iostream>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -22,9 +22,12 @@ public:
     void output(QString);
     QString latestInput;
     bool input;
+    bool finished;
+    bool canPlay;
 
 private slots:
     void on_pushButton_clicked();
+    void updatePlay();
 
 private:
     Ui::MainWindow *ui;
