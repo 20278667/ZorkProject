@@ -12,9 +12,12 @@ CommandWords::CommandWords() {
         validCommands.push_back("quit");
         validCommands.push_back("info");
         validCommands.push_back("map");
-        validCommands.push_back("take");
-        validCommands.push_back("put");
+        validCommands.push_back("guess");
+        validCommands.push_back("look");
         validCommands.push_back("teleport");
+        //validCommands.push_back("take");
+        //validCommands.push_back("put");
+        //validCommands.push_back("inventory");
     }
 }
 
@@ -32,14 +35,12 @@ bool CommandWords::isCommand(string aString) {
     return false;
 }
 
-/*
- * Print all valid commands to System.out.
- */
-void CommandWords::showAll() {
-    //Loops through validCommands and prints each to the screen.
+string CommandWords::showAll() {
+    //Loops through validCommands and adds each to the output string.
+    string out;
     for (unsigned int i = 0; i < validCommands.size(); i++)
     {
-        cout << validCommands[i]<< "  ";
+        out += validCommands[i] + ", ";
     }
-    cout << endl;
+    return out;
 }

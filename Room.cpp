@@ -2,7 +2,8 @@
 #include "Command.h"
 
 
-Room::Room(string description) {
+Room::Room(string name, string description) {
+    this->name = name;
 	this->description = description;
 }
 
@@ -17,12 +18,21 @@ void Room::setExits(Room *north, Room *east, Room *south, Room *west) {
 		exits["west"] = west;
 }
 
+void Room::addPuzzle(Puzzle *i) {
+    p = i;
+    p->Reset();
+}
+
+bool Room::hasPuzzle() {
+    return (p != NULL);
+}
+
 string Room::shortDescription() {
 	return description;
 }
 
 string Room::longDescription() {
-	return "room = " + description + ".\n" + displayItem() + exitString();
+    return name + "\n" + description + "\n" + displayItem() + exitString();
 }
 
 string Room::exitString() {
@@ -42,21 +52,19 @@ Room* Room::nextRoom(string direction) {
 }
 
 void Room::addItem(Item *inItem) {
-    //cout <<endl;
-    //cout << "Just added" + inItem->getLongDescription();
     itemsInRoom.push_back(*inItem);
 }
 
 string Room::displayItem() {
-    string tempString = "items in room = ";
+    string tempString = "Items in room: ";
     int sizeItems = (itemsInRoom.size());
     if (itemsInRoom.size() < 1) {
-        tempString = "no items in room";
+        tempString = "No items in room.";
         }
     else if (itemsInRoom.size() > 0) {
-       int x = (0);
+        int x = (0);
         for (int n = sizeItems; n > 0; n--) {
-            tempString = tempString + itemsInRoom[x].getShortDescription() + "  " ;
+            tempString = tempString + itemsInRoom[x].getShortDescription() + ", " ;
             x++;
             }
         }

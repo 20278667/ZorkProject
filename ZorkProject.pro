@@ -16,7 +16,9 @@ SOURCES += \
     item.cpp \
     Parser.cpp \
     Room.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    puzzle.cpp \
+    zorkle.cpp
 
 HEADERS += \
     Character.h \
@@ -26,7 +28,9 @@ HEADERS += \
     item.h \
     Parser.h \
     Room.h \
-    mainwindow.h
+    mainwindow.h \
+    puzzle.h \
+    zorkle.h
 
 FORMS += \
     mainwindow.ui

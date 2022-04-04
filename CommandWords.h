@@ -19,7 +19,7 @@ private:
 public:
     CommandWords();
     bool isCommand(string aString);
-    void showAll();
+    string showAll();
 };
 
 

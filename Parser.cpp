@@ -45,6 +45,13 @@ Command* Parser::getCommand(QString line) {
 /**
  * Print out a list of valid command words.
  */
-void Parser::showCommands() {
-    commands->showAll();
+string Parser::showCommands() {
+    return commands->showAll();
+}
+
+string toLower(string s) {
+    for (unsigned int i = 0; i < s.length(); i++) {
+        if (std::isupper(s[i])) s[i] = std::tolower(s[i]);
+    }
+    return s;
 }

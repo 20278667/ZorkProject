@@ -19,24 +19,30 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-//Slots
-void MainWindow::on_pushButton_clicked() {
-    input = true;
-    latestInput = ui->dialogue->toPlainText();
-    ui->dialogue->clear();
-    output("> " + latestInput + "\n");
-}
-
 void MainWindow::updatePlay() {
     canPlay = true;
 }
 
+//Slots
+void MainWindow::on_pushButton_clicked() {
+    input = true;
+    latestInput = ui->dialogue->toPlainText().trimmed();
+    ui->dialogue->clear();
+    output("> " + latestInput + "\n");
+}
 
-//inline display functions
+void MainWindow::on_dialogue_textChanged()
+{
+    if (ui->dialogue->toPlainText().endsWith("\n")) {
+        on_pushButton_clicked();
+    }
+}
+
+//inline display functions; the first function is a wrapper function for output(QString)
 inline void MainWindow::output(std::string out) {
     output(QString::fromStdString(out));
 }
 
 inline void MainWindow::output(QString out) {
-    ui->display->insertPlainText(out);
+    ui->display->insertPlainText(out.trimmed() + "\n");
 }

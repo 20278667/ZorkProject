@@ -1,32 +1,32 @@
 #include "ZorkUL.h"
 #include "mainwindow.h"
+#include "zorkle.h"
 
 //data
 MainWindow *w;
-int roomCount = 9;
-Room* rooms[9];
+QApplication *a;
+const int roomCount = 9;
+Room* rooms[roomCount];
 
 //flags
 bool input = false;
 
-//overloaded operator << for ease of sending data to MainWindow w for display.
+//overloaded friend inline operator << for ease of sending data to MainWindow w for display.
 inline MainWindow* operator<< (MainWindow *m, QString s) {
     m->output(s);
     return m;
 }
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
+int main(int argc, char *argv[]) {
+    a = new QApplication(argc, argv);
     w = new MainWindow();
     w->show();
     ZorkUL temp;
     thread t1(&ZorkUL::play, temp);
-    int i = a.exec();
+    int i = a->exec();
     t1.join();
     return i;
 }
-
 
 //constructor
 ZorkUL::ZorkUL() {
@@ -35,9 +35,6 @@ ZorkUL::ZorkUL() {
 
 //main game loop
 void ZorkUL::play() {
-    w << QString::fromStdString(to_string(w->finished)) + QString("\n");
-    w << QString::fromStdString(to_string(w->canPlay)) + QString("\n");
-    w << QString::fromStdString(to_string(w->input)) + QString("\n");
     while(!w->finished) {
         if (w->canPlay) {
             w->canPlay = false;
@@ -49,37 +46,37 @@ void ZorkUL::play() {
                         // Pass dereferenced command and check for end of game.
                         w->finished = processCommand(*command);
                     }
-                    // Free the memory allocated by "parser.getCommand()"
-                    //   with ("return new Command(...)")
+                    // Free the memory allocated by "parser.getCommand()" with ("return new Command(...)")
                     delete command;
                 }
         }
-        this_thread::sleep_for(chrono::milliseconds(1000));
+        this_thread::sleep_for(chrono::milliseconds(100));
     }
-    w << QString("\n end \n");
-    w << QString("\n");
+    w << QString("End.");
+    a->quit();
 }
 
 
 void ZorkUL::createRooms()  {
 
-    rooms[0] = new Room("a");
-        rooms[0]->addItem(new Item("x", 1, 11));
-        rooms[0]->addItem(new Item("y", 2, 22));
-    rooms[1] = new Room("b");
-        rooms[1]->addItem(new Item("xx", 3, 33));
-        rooms[1]->addItem(new Item("yy", 4, 44));
-    rooms[2] = new Room("c");
-    rooms[3] = new Room("d");
-    rooms[4] = new Room("e");
-    rooms[5] = new Room("f");
-    rooms[6] = new Room("g");
-    rooms[7] = new Room("h");
-    rooms[8] = new Room("i");
+    rooms[0] = new Room("Dungeon Cell", "A dank and dusty dungeon. Every surface is covered with a thick layer dirt and grime.");
+        //rooms[0]->addItem(new Item("x", 1, 11));
+    rooms[1] = new Room("Bright Hallway", "A stone hallway. You believe there must be an exit nearby due to a cold draught.");
+    rooms[2] = new Room("Dingy Hallway", "Dark, gloomy and dirty. 2/10, terrible hallway.");
+    rooms[3] = new Room("Dirty Hallway", "Perhaps the worst corridor you have had the honour of walking in. So dark a gru may be lurking nearby.");
+    rooms[4] = new Room("Empty Room", "Hardly even cobwebs remain. Whatever was once in this room is now long gone.");
+    rooms[5] = new Room("Filthy Hallway", "\"The light fixtures are functioning\" would be the kindest thing to say about this corridor.");
+    rooms[6] = new Room("The Way Out", "An exit! Light leaks in from under a study, locked wooden door. Too heavy to break."
+                                       "But there seems to be a puzzle mechanism that would unlock this door.");
+        rooms[6]->addPuzzle(new Zorkle());
+    rooms[7] = new Room("Cells", "More cells, all empty. How did you end up in this place?");
+    rooms[8] = new Room("Warden's Room", "This room's only feature of note is a strange journal which chronicles an attempt to create a peculiar "
+                                         "form of lock for the exit door. Unfortunately, the location of this door is left unspecified.");
+        rooms[8]->addPuzzle(new Zorkle());
 
     //                  (N, E, S, W)
     rooms[0]->setExits(rooms[5], rooms[1], rooms[3], rooms[2]);
-    rooms[1]->setExits(NULL, NULL, NULL, rooms[0]);
+    rooms[1]->setExits(rooms[6], NULL, NULL, rooms[0]);
     rooms[2]->setExits(NULL, rooms[0], NULL, NULL);
     rooms[3]->setExits(rooms[0], rooms[4], NULL, rooms[8]);
     rooms[4]->setExits(NULL, NULL, NULL, rooms[3]);
@@ -93,21 +90,22 @@ void ZorkUL::createRooms()  {
 }
 
 void ZorkUL::printWelcome() {
-    w << QString("start\n");
-    w << QString("info for help\n");
-    w << QString::fromStdString(currentRoom->longDescription()) + "\n";
+    w << QString("Welcome to Zorkle, the leading text based Wordle-like adventure game.");
+    w << QString("Please use the GUI or enter commands in the dialogue box below to proceed.");
+    w << QString("Press the question mark or enter \"info\" below for information on other commands.");
+    w << QString("Enjoy the game!");
+    w << QString::fromStdString(currentRoom->longDescription());
 }
 
 /** COMMANDS **/
 void ZorkUL::printHelp() {
-    w << QString("valid inputs are;\n");
-    parser.showCommands();
-
+    w << QString("Valid commands are: ");
+    w << QString::fromStdString(parser.showCommands());
 }
 
 void ZorkUL::goRoom(Command command) {
     if (!command.hasSecondWord()) {
-        w << QString("incomplete input\n");
+        w << QString("Incomplete input.");
         return;
     }
 
@@ -117,10 +115,10 @@ void ZorkUL::goRoom(Command command) {
     Room* nextRoom = currentRoom->nextRoom(direction);
 
     if (nextRoom == NULL)
-        w << QString("underdefined input");
+        w << QString("Underdefined input.");
     else {
         currentRoom = nextRoom;
-        w << QString::fromStdString(currentRoom->longDescription() + string("\n"));
+        w << QString::fromStdString(currentRoom->longDescription());
     }
 }
 
@@ -130,7 +128,7 @@ string ZorkUL::go(string direction) {
     //Move to the next room
     Room* nextRoom = currentRoom->nextRoom(direction);
     if (nextRoom == NULL)
-        return("direction null");
+        return("Direction is null.");
     else
     {
         currentRoom = nextRoom;
@@ -146,7 +144,7 @@ string ZorkUL::go(string direction) {
  */
 bool ZorkUL::processCommand(Command command) {
     if (command.isUnknown()) {
-        w << QString("invalid input\n");
+        w << QString("Invalid input.");
         return false;
     }
 
@@ -154,40 +152,43 @@ bool ZorkUL::processCommand(Command command) {
     if (commandWord.compare("info") == 0)
         printHelp();
 
-    else if (commandWord.compare("map") == 0)
-        {
-            w << QString("[h] --- [f] --- [g]\n");
-            w << QString("         |         \n");
-            w << QString("         |         \n");
-            w << QString("[c] --- [a] --- [b]\n");
-            w << QString("         |         \n");
-            w << QString("         |         \n");
-            w << QString("[i] --- [d] --- [e]\n");
-        }
+    else if (commandWord.compare("map") == 0) {
+        //\u200B is a 0 length space character, used for formatting purposes here; leading whitespace is trimmed otherwise.
+        w << QString("      [h] --- [f] --- [g]");
+        w << QString("\u200B         |         ");
+        w << QString("\u200B         |         ");
+        w << QString("      [c] --- [a] --- [b]");
+        w << QString("\u200B         |         ");
+        w << QString("\u200B         |         ");
+        w << QString("      [i] --- [d] --- [e]");
+    }
 
-    else if (commandWord.compare("go") == 0)
+    else if (commandWord.compare("look") == 0) {
+
+    }
+
+    else if (commandWord.compare("go") == 0) {
         goRoom(command);
+    }
 
-    else if (commandWord.compare("take") == 0)
-    {
+    else if (commandWord.compare("take") == 0) {
         if (!command.hasSecondWord()) {
-        w << QString("incomplete input");
+            w << QString("Incomplete input.");
         }
         else if (command.hasSecondWord()) {
-        w << QString::fromStdString("you're trying to take " + command.getSecondWord() + "\n");
-        int location = currentRoom->isItemInRoom(command.getSecondWord());
-        if (location  < 0 )
-            w << QString("item is not in room\n");
-        else {
-            w << QString("item is in room\n");
-            w << QString::fromStdString("index number " + std::to_string(location) + "\n\n");
-            w << QString::fromStdString(currentRoom->longDescription() + "\n");
-        }
+            w << QString::fromStdString("You're trying to take " + command.getSecondWord());
+            int location = currentRoom->isItemInRoom(command.getSecondWord());
+            if (location < 0 )
+                w << QString("Item is not in the room.");
+            else {
+                w << QString("Item is in the room.");
+                w << QString::fromStdString("Index number: " + to_string(location));
+                w << QString::fromStdString(currentRoom->longDescription());
+            }
         }
     }
 
-    else if (commandWord.compare("put") == 0)
-    {
+    else if (commandWord.compare("put") == 0) {
 
     }
     /*
@@ -207,17 +208,16 @@ bool ZorkUL::processCommand(Command command) {
             srand (time(NULL));
             int randomRoomIndex = rand() % roomCount;
             currentRoom = rooms[randomRoomIndex];
-            w << QString::fromStdString(currentRoom->longDescription() + "\n");
+            w << QString("Your vision goes white, and you find yourself displaced in space.");
+            w << QString::fromStdString(currentRoom->longDescription());
         }
         else {
-            w << QString("overdefined input\n");
+            w << QString("Overdefined input.");
         }
     }
     else if (commandWord.compare("quit") == 0) {
-        if (command.hasSecondWord())
-            w << QString("overdefined input\n");
-        else
-            return true; /**signal to quit*/
+        w << QString("Quitting.");
+        return true; //signal to quit
     }
     return false;
 }

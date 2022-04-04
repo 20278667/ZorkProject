@@ -12,7 +12,8 @@ private:
 public:
     Parser();
     Command* getCommand(QString);
-    void showCommands();
+    string showCommands();
+    string toLower(string);
 };
 
 #endif /*PARSER_H_*/
