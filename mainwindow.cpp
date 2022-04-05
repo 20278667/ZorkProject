@@ -44,5 +44,13 @@ inline void MainWindow::output(std::string out) {
 }
 
 inline void MainWindow::output(QString out) {
+    for(int i = 0; i < out.length(); i++) {
+        if (out[i] == '<') {
+            ui->display->insertHtml(out.trimmed());
+            ui->display->insertHtml("</font><font color =\"#000000\">");
+            ui->display->insertPlainText("\n");
+            return;
+        }
+    }
     ui->display->insertPlainText(out.trimmed() + "\n");
 }

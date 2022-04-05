@@ -53,13 +53,13 @@ void ZorkUL::play() {
         this_thread::sleep_for(chrono::milliseconds(100));
     }
     w << QString("End.");
-    a->quit();
+    a->exit();
 }
 
 
 void ZorkUL::createRooms()  {
 
-    rooms[0] = new Room("Dungeon Cell", "A dank and dusty dungeon. Every surface is covered with a thick layer dirt and grime.");
+    rooms[0] = new Room("Dungeon Cell", "A dank and dusty dungeon. Every surface is covered with a thick layer of dirt and grime.");
         //rooms[0]->addItem(new Item("x", 1, 11));
     rooms[1] = new Room("Bright Hallway", "A stone hallway. You believe there must be an exit nearby due to a cold draught.");
     rooms[2] = new Room("Dingy Hallway", "Dark, gloomy and dirty. 2/10, terrible hallway.");
@@ -67,11 +67,13 @@ void ZorkUL::createRooms()  {
     rooms[4] = new Room("Empty Room", "Hardly even cobwebs remain. Whatever was once in this room is now long gone.");
     rooms[5] = new Room("Filthy Hallway", "\"The light fixtures are functioning\" would be the kindest thing to say about this corridor.");
     rooms[6] = new Room("The Way Out", "An exit! Light leaks in from under a study, locked wooden door. Too heavy to break."
-                                       "But there seems to be a puzzle mechanism that would unlock this door.");
+                                       "But there seems to be a puzzle mechanism that would unlock this door."
+                                       "[HINT: use the \"guess\" command to beat the puzzle!]");
         rooms[6]->addPuzzle(new Zorkle());
     rooms[7] = new Room("Cells", "More cells, all empty. How did you end up in this place?");
     rooms[8] = new Room("Warden's Room", "This room's only feature of note is a strange journal which chronicles an attempt to create a peculiar "
-                                         "form of lock for the exit door. Unfortunately, the location of this door is left unspecified.");
+                                         "form of lock for the exit door. Unfortunately, the location of this door is left unspecified."
+                                         "[HINT: use the \"guess\" command to beat the puzzle!]");
         rooms[8]->addPuzzle(new Zorkle());
 
     //                  (N, E, S, W)
@@ -152,19 +154,43 @@ bool ZorkUL::processCommand(Command command) {
     if (commandWord.compare("info") == 0)
         printHelp();
 
+    else if (commandWord.compare("guess") == 0) {
+        if (currentRoom->hasPuzzle()) {
+            if (command.hasSecondWord()) {
+                if (!currentRoom->puzzle->isCorrect()) {
+                    currentRoom->puzzle->tryInput(command.getSecondWord());
+                    vector<string> lines = currentRoom->puzzle->outputState();
+                    for (unsigned int i = 0; i < lines.size(); i++) {
+                        w << QString::fromStdString(lines[i]);
+                    }
+                }
+                else {
+                    w << QString("Puzzle is already complete. Resetting puzzle.");
+                    currentRoom->puzzle->Reset();
+                }
+            }
+            else {
+                w << QString("Underdefined input.");
+            }
+        }
+        else {
+            w << QString("This room does not have a puzzle.");
+        }
+    }
+
     else if (commandWord.compare("map") == 0) {
         //\u200B is a 0 length space character, used for formatting purposes here; leading whitespace is trimmed otherwise.
-        w << QString("      [h] --- [f] --- [g]");
-        w << QString("\u200B         |         ");
-        w << QString("\u200B         |         ");
-        w << QString("      [c] --- [a] --- [b]");
-        w << QString("\u200B         |         ");
-        w << QString("\u200B         |         ");
-        w << QString("      [i] --- [d] --- [e]");
+        w << QString("[h] --- [f] --- [g]\n"
+              "\u200B          |         \n"
+              "\u200B          |         \n"
+                     "[c] --- [a] --- [b]\n"
+              "\u200B          |         \n"
+              "\u200B          |         \n"
+                     "[i] --- [d] --- [e]");
     }
 
     else if (commandWord.compare("look") == 0) {
-
+        w << QString::fromStdString(currentRoom->longDescription());
     }
 
     else if (commandWord.compare("go") == 0) {

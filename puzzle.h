@@ -2,17 +2,18 @@
 #define PUZZLE_H
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
 //pure virtual class
 class Puzzle {
 public:
-    Puzzle();
+    Puzzle() { }
     virtual void Reset() = 0;
-    virtual bool isCorrect();
-    virtual void tryInput();
-    virtual string outputState();
+    virtual bool isCorrect() { return false; }
+    virtual void tryInput(string) { };
+    virtual vector<string> outputState() { return vector<string> {""}; }
 };
 
 #endif // PUZZLE_H

@@ -1,7 +1,6 @@
 #ifndef ZORKLE_H
 #define ZORKLE_H
 
-#include <vector>
 #include "puzzle.h"
 
 //inherits abstract class Puzzle
@@ -10,14 +9,18 @@ public:
     Zorkle();
     void Reset();
     bool isCorrect();
-    void tryInput();
-    string outputState();
+    vector<string> outputState();
+    void tryInput(string);
     string word;
     vector<string> words;
 private:
     int totalGuesses;
     int remainingGuesses;
+    string formatLine(string, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+    string intToString(unsigned int);
     string randomWord();
+    string toLower(string);
+    bool validInput(string);
 };
 
 #endif // ZORKLE_H

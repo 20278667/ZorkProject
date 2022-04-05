@@ -17,9 +17,9 @@ private:
 	map<string, Room*> exits;
 	string exitString();
     vector <Item> itemsInRoom;
-    Puzzle* p;
 
 public:
+    Puzzle* puzzle;
     int numberOfItems();
     Room(string name, string description);
 	void setExits(Room *north, Room *east, Room *south, Room *west);

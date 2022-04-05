@@ -19,12 +19,12 @@ void Room::setExits(Room *north, Room *east, Room *south, Room *west) {
 }
 
 void Room::addPuzzle(Puzzle *i) {
-    p = i;
-    p->Reset();
+    puzzle = i;
+    puzzle->Reset();
 }
 
 bool Room::hasPuzzle() {
-    return (p != NULL);
+    return (puzzle != NULL);
 }
 
 string Room::shortDescription() {
@@ -59,7 +59,7 @@ string Room::displayItem() {
     string tempString = "Items in room: ";
     int sizeItems = (itemsInRoom.size());
     if (itemsInRoom.size() < 1) {
-        tempString = "No items in room.";
+        tempString = "";
         }
     else if (itemsInRoom.size() > 0) {
         int x = (0);
