@@ -1,39 +1,35 @@
 #include "zorkle.h"
-#include <iostream>
-#include <fstream>
 
 const int wordCount = 2315;
-
+const string targetList = "words.txt";
+const string guessList = "allowed.txt";
 Zorkle::Zorkle() {
+    totalGuesses = 6;
     Reset();
-    cout << word << endl;
 }
 
 void Zorkle::Reset() {
-    string word = randomWord();
-    totalGuesses = 6;
     remainingGuesses = totalGuesses;
+    string word = randomWord();
     words.clear();
 }
 
 bool Zorkle::isCorrect() {
-    bool correct = false;
     if (words.size() > 0) {
         for (unsigned int i = 0; i < words.size(); i++) {
             if (words[i].compare(word) == 0) {
-                correct = true;
-                break;
+                return true;
             }
         }
     }
-    return correct;
+    return false;
 }
 
 void Zorkle::tryInput(string s) {
     if (!isCorrect()) {
         s = toLower(s);
         if (validInput(s)) {
-            if (remainingGuesses != 0) {
+            if (remainingGuesses > 0) {
                 words.push_back(s);
                 remainingGuesses--;
             }
@@ -41,6 +37,27 @@ void Zorkle::tryInput(string s) {
     }
 }
 
+vector<string> Zorkle::outputState() {
+    vector<string> output;
+    string outputColor;
+    //3 for loops, runs in O(n) time, n <= 6.
+    for (unsigned int i = 0; i < words.size(); i++) {
+        for (unsigned int j = 0; j < words[i].length(); j++) {
+            for (unsigned int k = 0; k < word.length(); k++) {
+                if (word[k] == words[i][j]) {
+                    outputColor = "#ffe100";                    //yellow
+                    if (k == j) outputColor = "#07d92a";        //green
+                }
+                else outputColor = "#3e434a";                   //dark grey
+            }
+            output.push_back(to_string(words[i][j]));
+            output.push_back(outputColor);
+        }
+    }
+    return output;
+}
+
+/*
 vector<string> Zorkle::outputState() {
     vector<string> output;
     //bit structures used to satisfy submission criteria
@@ -116,13 +133,11 @@ inline string Zorkle::intToString(unsigned int input) {
     else return "07d92a";
     //<font color=\"#ff9900\">[sic]</font>
 }
-
-
+*/
 string Zorkle::randomWord() {
     srand (time(NULL));
     int wordLine = 1 + (rand() % wordCount);
-    ifstream wordList("words.txt");
-    //C:/Users/Perill/Documents/Qt/ZorkProject/
+    ifstream wordList(targetList);
     string line;
     int count = 0;
     while (getline(wordList, line)) {
@@ -131,18 +146,33 @@ string Zorkle::randomWord() {
             break;
         }
     }
+    cout << "Word: " << line << "@ " << wordLine << endl;
     wordList.close();
-    //exception
     return line;
 }
 
 bool Zorkle::validInput(string s) {
+    if (s.length() != 5) return false;
     for (unsigned int i = 0; i < s.length(); i++) {
         if (s[i] < 'a' || s[i] > 'z') {
             return false;
         }
     }
-    return true;
+    return containsWord(s);
+}
+
+bool Zorkle::containsWord(string s) {
+    ifstream wordList(guessList);
+    string line;
+    int count = 0;
+    while (getline(wordList, line)) {
+        count++;
+        if (s.compare(line) == 0) {
+            return true;
+        }
+    }
+    wordList.close();
+    return false;
 }
 
 string Zorkle::toLower(string s) {

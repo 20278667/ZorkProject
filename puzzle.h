@@ -10,6 +10,7 @@ using namespace std;
 class Puzzle {
 public:
     Puzzle() { }
+    int remainingGuesses;
     virtual void Reset() = 0;
     virtual bool isCorrect() { return false; }
     virtual void tryInput(string) { };

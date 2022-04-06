@@ -39,18 +39,27 @@ void MainWindow::on_dialogue_textChanged()
 }
 
 //inline display functions; the first function is a wrapper function for output(QString)
-inline void MainWindow::output(std::string out) {
-    output(QString::fromStdString(out));
+//contains default color value of black
+inline void MainWindow::output(std::string out, std::string color) {
+    output(QString::fromStdString(out), QString::fromStdString(color));
 }
 
-inline void MainWindow::output(QString out) {
-    for(int i = 0; i < out.length(); i++) {
-        if (out[i] == '<') {
-            ui->display->insertHtml(out.trimmed());
-            ui->display->insertHtml("</font><font color =\"#000000\">");
-            ui->display->insertPlainText("\n");
-            return;
-        }
-    }
-    ui->display->insertPlainText(out.trimmed() + "\n");
+inline void MainWindow::output(QString out, QString color) {
+    outputAppend(out, color);
+    ui->display->insertPlainText("\n");
+    ui->display->ensureCursorVisible();
+}
+
+inline void MainWindow::outputAppend(QString out, QString color) {
+    colorStart(color);
+    ui->display->insertPlainText(out);
+    colorEnd();
+}
+
+inline void MainWindow::colorStart(QString color) {
+    ui->display->insertHtml("<font color =\"" + color + "\">");
+}
+
+inline void MainWindow::colorEnd() {
+    ui->display->insertHtml("<\font>");
 }

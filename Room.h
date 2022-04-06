@@ -19,7 +19,7 @@ private:
     vector <Item> itemsInRoom;
 
 public:
-    Puzzle* puzzle;
+    Puzzle* puzzle = NULL;
     int numberOfItems();
     Room(string name, string description);
 	void setExits(Room *north, Room *east, Room *south, Room *west);

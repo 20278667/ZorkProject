@@ -18,8 +18,11 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void output(std::string);
-    void output(QString);
+    void output(std::string, std::string color = "#000000");
+    void output(QString, QString color = "#000000");
+    void outputAppend(QString, QString color = "#000000");
+    void colorStart(QString color);
+    void colorEnd();
     QString latestInput;
     bool input;
     bool finished;

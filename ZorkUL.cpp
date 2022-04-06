@@ -12,6 +12,7 @@ Room* rooms[roomCount];
 bool input = false;
 
 //overloaded friend inline operator << for ease of sending data to MainWindow w for display.
+//if statement seperates out tags from the body.
 inline MainWindow* operator<< (MainWindow *m, QString s) {
     m->output(s);
     return m;
@@ -42,10 +43,7 @@ void ZorkUL::play() {
                     w->input = false;
                     // Create pointer to command and give it a command.
                     Command* command = parser.getCommand(w->latestInput);
-                    if (!(command->getCommandWord().empty())) {
-                        // Pass dereferenced command and check for end of game.
-                        w->finished = processCommand(*command);
-                    }
+                    w->finished = processCommand(*command);
                     // Free the memory allocated by "parser.getCommand()" with ("return new Command(...)")
                     delete command;
                 }
@@ -66,9 +64,9 @@ void ZorkUL::createRooms()  {
     rooms[3] = new Room("Dirty Hallway", "Perhaps the worst corridor you have had the honour of walking in. So dark a gru may be lurking nearby.");
     rooms[4] = new Room("Empty Room", "Hardly even cobwebs remain. Whatever was once in this room is now long gone.");
     rooms[5] = new Room("Filthy Hallway", "\"The light fixtures are functioning\" would be the kindest thing to say about this corridor.");
-    rooms[6] = new Room("The Way Out", "An exit! Light leaks in from under a study, locked wooden door. Too heavy to break."
-                                       "But there seems to be a puzzle mechanism that would unlock this door."
-                                       "[HINT: use the \"guess\" command to beat the puzzle!]");
+    rooms[6] = new Room("The Way Out", "An exit! Light leaks in from under a study, locked wooden door. Too heavy to break. "
+                                       "But there seems to be a nearby puzzle mechanism that would unlock this door if you could solve it.\n"
+                                       "[HINT: use the \"guess\" command with a five letter word to beat the Wordle-esque puzzle!]");
         rooms[6]->addPuzzle(new Zorkle());
     rooms[7] = new Room("Cells", "More cells, all empty. How did you end up in this place?");
     rooms[8] = new Room("Warden's Room", "This room's only feature of note is a strange journal which chronicles an attempt to create a peculiar "
@@ -157,15 +155,16 @@ bool ZorkUL::processCommand(Command command) {
     else if (commandWord.compare("guess") == 0) {
         if (currentRoom->hasPuzzle()) {
             if (command.hasSecondWord()) {
-                if (!currentRoom->puzzle->isCorrect()) {
+                if (!currentRoom->puzzle->isCorrect() && currentRoom->puzzle->remainingGuesses > 0) {
                     currentRoom->puzzle->tryInput(command.getSecondWord());
                     vector<string> lines = currentRoom->puzzle->outputState();
-                    for (unsigned int i = 0; i < lines.size(); i++) {
-                        w << QString::fromStdString(lines[i]);
+                    for (unsigned int i = 0; i < lines.size(); i+=2) {
+                        w->outputAppend(QString::fromStdString(lines[i]), QString::fromStdString(lines[i+1]));
+                        w << QString(""); //outputs "\n"
                     }
                 }
                 else {
-                    w << QString("Puzzle is already complete. Resetting puzzle.");
+                    w << QString("Unable to guess further. Puzzle has been reset.");
                     currentRoom->puzzle->Reset();
                 }
             }
@@ -201,7 +200,7 @@ bool ZorkUL::processCommand(Command command) {
         if (!command.hasSecondWord()) {
             w << QString("Incomplete input.");
         }
-        else if (command.hasSecondWord()) {
+        else {
             w << QString::fromStdString("You're trying to take " + command.getSecondWord());
             int location = currentRoom->isItemInRoom(command.getSecondWord());
             if (location < 0 )
