@@ -38,8 +38,8 @@ void MainWindow::on_dialogue_textChanged()
     }
 }
 
-//inline display functions; the first function is a wrapper function for output(QString)
-//contains default color value of black
+//inline display functions
+//have default color value of black|#000000
 inline void MainWindow::output(std::string out, std::string color) {
     output(QString::fromStdString(out), QString::fromStdString(color));
 }
@@ -51,15 +51,17 @@ inline void MainWindow::output(QString out, QString color) {
 }
 
 inline void MainWindow::outputAppend(QString out, QString color) {
-    colorStart(color);
+    moveCursorToEnd();
+    colorIn(color);
     ui->display->insertPlainText(out);
-    colorEnd();
 }
 
-inline void MainWindow::colorStart(QString color) {
-    ui->display->insertHtml("<font color =\"" + color + "\">");
+inline void MainWindow::colorIn(QString color) {
+    ui->display->setTextColor(QColor(color));
 }
 
-inline void MainWindow::colorEnd() {
-    ui->display->insertHtml("<\font>");
+inline void MainWindow::moveCursorToEnd() {
+    QTextCursor newCursor = ui->display->textCursor();
+    newCursor.movePosition(QTextCursor::End);
+    ui->display->setTextCursor(newCursor);
 }

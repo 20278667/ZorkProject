@@ -1,7 +1,7 @@
 #include "zorkle.h"
 
 const int wordCount = 2315;
-const string targetList = "words.txt";
+const string targetList = "targets.txt";
 const string guessList = "allowed.txt";
 Zorkle::Zorkle() {
     totalGuesses = 6;
@@ -10,7 +10,8 @@ Zorkle::Zorkle() {
 
 void Zorkle::Reset() {
     remainingGuesses = totalGuesses;
-    string word = randomWord();
+    cout << remainingGuesses << " | " << totalGuesses << endl;
+    word = randomWord();
     words.clear();
 }
 
@@ -31,7 +32,9 @@ void Zorkle::tryInput(string s) {
         if (validInput(s)) {
             if (remainingGuesses > 0) {
                 words.push_back(s);
+                cout << "her: " << remainingGuesses << endl;
                 remainingGuesses--;
+                cout << "she: " << remainingGuesses << endl;
             }
         }
     }
@@ -41,16 +44,20 @@ vector<string> Zorkle::outputState() {
     vector<string> output;
     string outputColor;
     //3 for loops, runs in O(n) time, n <= 6.
+    //loops over all entered words
     for (unsigned int i = 0; i < words.size(); i++) {
+        //loops over each character of the ith guess
         for (unsigned int j = 0; j < words[i].length(); j++) {
+            //loops over each character of the target
             for (unsigned int k = 0; k < word.length(); k++) {
                 if (word[k] == words[i][j]) {
                     outputColor = "#ffe100";                    //yellow
                     if (k == j) outputColor = "#07d92a";        //green
+                    break;
                 }
                 else outputColor = "#3e434a";                   //dark grey
             }
-            output.push_back(to_string(words[i][j]));
+            output.push_back(string(1, words[i][j]));
             output.push_back(outputColor);
         }
     }
@@ -146,7 +153,7 @@ string Zorkle::randomWord() {
             break;
         }
     }
-    cout << "Word: " << line << "@ " << wordLine << endl;
+    cout << "Word: " << line << endl;
     wordList.close();
     return line;
 }
@@ -161,7 +168,11 @@ bool Zorkle::validInput(string s) {
     return containsWord(s);
 }
 
+//so many 5 letter combinations are valid, so it is assumed a valid 5 letter word has been entered
 bool Zorkle::containsWord(string s) {
+    s = ""; //removes warning for not using input
+    return true;
+    /*
     ifstream wordList(guessList);
     string line;
     int count = 0;
@@ -172,7 +183,7 @@ bool Zorkle::containsWord(string s) {
         }
     }
     wordList.close();
-    return false;
+    return false;*/
 }
 
 string Zorkle::toLower(string s) {

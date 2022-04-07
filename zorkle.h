@@ -10,8 +10,7 @@
 class Zorkle : public Puzzle {
 public:
     Zorkle();
-    int totalGuesses;
-    int remainingGuesses;
+    unsigned int totalGuesses;
     void Reset();
     bool isCorrect();
     vector<string> outputState();

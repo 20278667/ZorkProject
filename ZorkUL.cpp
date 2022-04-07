@@ -155,14 +155,23 @@ bool ZorkUL::processCommand(Command command) {
     else if (commandWord.compare("guess") == 0) {
         if (currentRoom->hasPuzzle()) {
             if (command.hasSecondWord()) {
+                cout << "Correct: " << currentRoom->puzzle->isCorrect() << ", remaining guesses: " << currentRoom->puzzle->remainingGuesses << endl;
                 if (!currentRoom->puzzle->isCorrect() && currentRoom->puzzle->remainingGuesses > 0) {
                     currentRoom->puzzle->tryInput(command.getSecondWord());
                     vector<string> lines = currentRoom->puzzle->outputState();
+                    unsigned int letterCount = 1;
                     for (unsigned int i = 0; i < lines.size(); i+=2) {
-                        w->outputAppend(QString::fromStdString(lines[i]), QString::fromStdString(lines[i+1]));
-                        w << QString(""); //outputs "\n"
+                        w->outputAppend(QString::fromStdString(lines[i] + " "), QString::fromStdString(lines[i+1]));
+                        if (letterCount == 5) {
+                            letterCount = 0;
+                            w << QString(""); //outputs "\n"
+                        }
+                        letterCount++;
                     }
+                    w << QString(""); //outputs "\n"
+                    if (currentRoom->puzzle->isCorrect()) w << QString("Puzzle complete!");
                 }
+                else if (currentRoom->puzzle->isCorrect()) w << QString("Puzzle complete!");
                 else {
                     w << QString("Unable to guess further. Puzzle has been reset.");
                     currentRoom->puzzle->Reset();

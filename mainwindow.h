@@ -21,8 +21,8 @@ public:
     void output(std::string, std::string color = "#000000");
     void output(QString, QString color = "#000000");
     void outputAppend(QString, QString color = "#000000");
-    void colorStart(QString color);
-    void colorEnd();
+    void colorIn(QString color);
+    void moveCursorToEnd();
     QString latestInput;
     bool input;
     bool finished;
