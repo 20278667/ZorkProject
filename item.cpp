@@ -1,11 +1,11 @@
 #include "item.h"
 
-Item::Item (string inDescription, int inWeightGrams, float inValue, bool hidden) {
+/*Item::Item (string inDescription, int inWeightGrams, float inValue, bool hidden) {
 	description = inDescription;
 	setWeight(inWeightGrams);
 	value = inValue;
     this->hidden = hidden;
-}
+}*/
 
 Item::Item(string inDescription) {
 	description = inDescription;

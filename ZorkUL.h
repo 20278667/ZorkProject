@@ -6,6 +6,9 @@
 #include "Room.h"
 #include "item.h"
 #include "mainwindow.h"
+#include "zorkle.h"
+#include "invalidinputexception.h"
+
 #include <QTimer>
 #include <iostream>
 #include <string>

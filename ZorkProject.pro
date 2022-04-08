@@ -24,6 +24,7 @@ HEADERS += \
     Command.h \
     CommandWords.h \
     ZorkUL.h \
+    invalidinputexception.h \
     item.h \
     Parser.h \
     Room.h \

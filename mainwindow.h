@@ -18,10 +18,17 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    union latest;
+    latest* latestColors;
     void output(std::string, std::string color = "#000000");
     void output(QString, QString color = "#000000");
     void outputAppend(QString, QString color = "#000000");
     void colorIn(QString color);
+    void move(QString direction);
+    void showMap();
+    void showInfo();
+    void look();
+    void quitGame();
     void moveCursorToEnd();
     QString latestInput;
     bool input;
@@ -32,6 +39,15 @@ private slots:
     void on_pushButton_clicked();
     void on_dialogue_textChanged();
     void updatePlay();
+    void on_west_clicked();
+    void on_north_clicked();
+    void on_east_clicked();
+    void on_south_clicked();
+    void on_map_clicked();
+    void on_info_clicked();
+    void on_quit_clicked();
+
+    void on_look_clicked();
 
 private:
     Ui::MainWindow *ui;

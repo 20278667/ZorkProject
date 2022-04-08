@@ -10,7 +10,6 @@ Zorkle::Zorkle() {
 
 void Zorkle::Reset() {
     remainingGuesses = totalGuesses;
-    cout << remainingGuesses << " | " << totalGuesses << endl;
     word = randomWord();
     words.clear();
 }
@@ -37,6 +36,13 @@ void Zorkle::tryInput(string s) {
         }
     }
 }
+//template, used for char comparisons in outputState()
+template <typename T>
+int compare(T arg1, T arg2) {
+    if (arg1 > arg2) return 1;
+    else if (arg1 == arg2) return 0;
+    else return -1;
+}
 
 vector<string> Zorkle::outputState() {
     vector<string> output;
@@ -48,7 +54,7 @@ vector<string> Zorkle::outputState() {
         for (unsigned int j = 0; j < words[i].length(); j++) {
             //loops over each character of the target
             for (unsigned int k = 0; k < word.length(); k++) {
-                if (word[k] == words[i][j]) {
+                if (compare<char>(word[k], words[i][j]) == 0) {
                     outputColor = "#ffe100";                    //yellow
                     if (k == j) outputColor = "#07d92a";        //green
                     break;

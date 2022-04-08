@@ -1,14 +1,13 @@
 #include "ZorkUL.h"
-#include "mainwindow.h"
-#include "zorkle.h"
 #include "Character.h"
+
+#define ROOMCOUNT 10
 
 //data
 MainWindow *w;
 QApplication *a;
 Character *player;
-const int roomCount = 10;
-Room* rooms[roomCount];
+Room* rooms[ROOMCOUNT];
 
 //flags
 bool input = false;
@@ -27,6 +26,8 @@ int main(int argc, char *argv[]) {
     ZorkUL temp;
     thread t1(&ZorkUL::play, temp);
     int i = a->exec();
+    delete w;
+    delete a;
     t1.join();
     return i;
 }
@@ -175,7 +176,6 @@ bool ZorkUL::processCommand(Command command) {
     else if (commandWord.compare("guess") == 0) {
         if (currentRoom->hasPuzzle()) {
             if (command.hasSecondWord()) {
-                cout << "Correct: " << currentRoom->puzzle->isCorrect() << ", remaining guesses: " << currentRoom->puzzle->remainingGuesses << endl;
                 if (!currentRoom->puzzle->isCorrect() && currentRoom->puzzle->remainingGuesses > 0) {
                     currentRoom->puzzle->tryInput(command.getSecondWord());
                     vector<string> lines = currentRoom->puzzle->outputState();
@@ -230,7 +230,7 @@ bool ZorkUL::processCommand(Command command) {
             w << QString("Incomplete input.");
         }
         else {
-            w << QString::fromStdString("You're trying to take " + command.getSecondWord());
+            w << QString::fromStdString("You're trying to take " + command.getSecondWord() + ".");
             int location = currentRoom->isItemInRoom(command.getSecondWord());
             if (location < 0 )
                 w << QString("Item is not in the room.");
@@ -243,10 +243,30 @@ bool ZorkUL::processCommand(Command command) {
             }
         }
     }
+    //deallocation of destroyed items for memory management purposes
+    else if (commandWord.compare("destroy") == 0) {
+        if (!command.hasSecondWord()) {
+            w << QString("Incomplete input.");
+        }
+        else {
+            w << QString::fromStdString("You're trying to destroy " + command.getSecondWord() + ".");
+            int location = currentRoom->isItemInRoom(command.getSecondWord());
+            if (location < 0 )
+                w << QString("Item is not in the room.");
+            else {
+                w << QString::fromStdString("You destroyed the " + command.getSecondWord() + ".");
+                currentRoom->removeItemFromRoom(location);
+                w << QString::fromStdString(currentRoom->longDescription());
+                currentRoom->itemsInRoom.erase(currentRoom->itemsInRoom.begin() + location);
+            }
+        }
+    }
 
+
+    /*
     else if (commandWord.compare("put") == 0) {
 
-    }
+    }*/
     /*
     {
     if (!command.hasSecondWord()) {
@@ -259,16 +279,20 @@ bool ZorkUL::processCommand(Command command) {
         }
     }
 */
+    //use of user-defined exception InvalidInputException
     else if (commandWord.compare("teleport") == 0) {
-        if (!command.hasSecondWord()) {
+        try {
+            if (!command.hasSecondWord()) {
+                InvalidInputException e;
+                throw e;
+            }
             srand (time(NULL));
-            int randomRoomIndex = rand() % roomCount;
+            int randomRoomIndex = rand() % ROOMCOUNT;
             currentRoom = rooms[randomRoomIndex];
             w << QString("Your vision goes white, and you find yourself displaced in space.");
             w << QString::fromStdString(currentRoom->longDescription());
-        }
-        else {
-            w << QString("Overdefined input.");
+        }  catch (InvalidInputException& i) {
+            i.what();
         }
     }
     else if (commandWord.compare("quit") == 0) {
