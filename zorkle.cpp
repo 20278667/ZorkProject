@@ -32,9 +32,7 @@ void Zorkle::tryInput(string s) {
         if (validInput(s)) {
             if (remainingGuesses > 0) {
                 words.push_back(s);
-                cout << "her: " << remainingGuesses << endl;
                 remainingGuesses--;
-                cout << "she: " << remainingGuesses << endl;
             }
         }
     }

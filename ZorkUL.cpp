@@ -1,11 +1,13 @@
 #include "ZorkUL.h"
 #include "mainwindow.h"
 #include "zorkle.h"
+#include "Character.h"
 
 //data
 MainWindow *w;
 QApplication *a;
-const int roomCount = 9;
+Character *player;
+const int roomCount = 10;
 Room* rooms[roomCount];
 
 //flags
@@ -56,10 +58,14 @@ void ZorkUL::play() {
 
 
 void ZorkUL::createRooms()  {
+    //character creation
+    player = new Character("A human being, of normal proportions and ability.");
 
     rooms[0] = new Room("Dungeon Cell", "A dank and dusty dungeon. Every surface is covered with a thick layer of dirt and grime.");
-        //rooms[0]->addItem(new Item("x", 1, 11));
+        rooms[0]->addItem(new Item("shovel", 100, 10));
     rooms[1] = new Room("Bright Hallway", "A stone hallway. You believe there must be an exit nearby due to a cold draught.");
+        rooms[1]->addItem(new Item(rooms[0]->itemsInRoom.at(rooms[0]->isItemInRoom("shovel"))));
+        //^ invokes deep copy constructor
     rooms[2] = new Room("Dingy Hallway", "Dark, gloomy and dirty. 2/10, terrible hallway.");
     rooms[3] = new Room("Dirty Hallway", "Perhaps the worst corridor you have had the honour of walking in. So dark a gru may be lurking nearby.");
     rooms[4] = new Room("Empty Room", "Hardly even cobwebs remain. Whatever was once in this room is now long gone.");
@@ -73,10 +79,12 @@ void ZorkUL::createRooms()  {
                                          "form of lock for the exit door. Unfortunately, the location of this door is left unspecified."
                                          "[HINT: use the \"guess\" command to beat the puzzle!]");
         rooms[8]->addPuzzle(new Zorkle());
+    rooms[9] = rooms[1];
+    //^shallow copy constructor invoked
 
     //                  (N, E, S, W)
     rooms[0]->setExits(rooms[5], rooms[1], rooms[3], rooms[2]);
-    rooms[1]->setExits(rooms[6], NULL, NULL, rooms[0]);
+    rooms[1]->setExits(rooms[6], NULL, rooms[9], rooms[0]);
     rooms[2]->setExits(NULL, rooms[0], NULL, NULL);
     rooms[3]->setExits(rooms[0], rooms[4], NULL, rooms[8]);
     rooms[4]->setExits(NULL, NULL, NULL, rooms[3]);
@@ -84,6 +92,7 @@ void ZorkUL::createRooms()  {
     rooms[6]->setExits(NULL, NULL, NULL, rooms[5]);
     rooms[7]->setExits(NULL, rooms[5], NULL, NULL);
     rooms[8]->setExits(NULL, rooms[3], NULL, NULL);
+    rooms[9]->setExits(rooms[1], NULL, NULL, NULL);
 
     currentRoom = rooms[0];
     printWelcome();
@@ -149,8 +158,19 @@ bool ZorkUL::processCommand(Command command) {
     }
 
     string commandWord = command.getCommandWord();
-    if (commandWord.compare("info") == 0)
-        printHelp();
+    if (commandWord.compare("info") == 0) printHelp();
+
+    else if (commandWord.compare("inventory") == 0) {
+        if (player->inventory.size() == 0) {
+            w << QString("Your inventory is empty.");
+        }
+        else {
+            w << QString("Your inventory contains: ");
+            for (unsigned int i = 0; i < player->inventory.size(); i++) {
+                w << QString::fromStdString(player->inventory.at(i)->getShortDescription());
+            }
+        }
+    }
 
     else if (commandWord.compare("guess") == 0) {
         if (currentRoom->hasPuzzle()) {
@@ -188,13 +208,13 @@ bool ZorkUL::processCommand(Command command) {
 
     else if (commandWord.compare("map") == 0) {
         //\u200B is a 0 length space character, used for formatting purposes here; leading whitespace is trimmed otherwise.
-        w << QString("[h] --- [f] --- [g]\n"
-              "\u200B          |         \n"
-              "\u200B          |         \n"
-                     "[c] --- [a] --- [b]\n"
-              "\u200B          |         \n"
-              "\u200B          |         \n"
-                     "[i] --- [d] --- [e]");
+        w << QString("          [Cells] --- [Filthy Hallway] --- [The Way Out]\n"
+              "\u200B                                       |                               |\n"
+              "\u200B                                       |                               |\n"
+                     "[Dingy Hallway] --- [Dungeon Cell] --- [Bright Hallway]\n"
+              "\u200B                                       |         \n"
+              "\u200B                                       |         \n"
+                     "[Warden's Room] --- [Dirty Hallway] --- [Empty Room]");
     }
 
     else if (commandWord.compare("look") == 0) {
@@ -215,9 +235,11 @@ bool ZorkUL::processCommand(Command command) {
             if (location < 0 )
                 w << QString("Item is not in the room.");
             else {
-                w << QString("Item is in the room.");
-                w << QString::fromStdString("Index number: " + to_string(location));
+                w << QString::fromStdString("You add " + command.getSecondWord() + " to your inventory.");
+                currentRoom->removeItemFromRoom(location);
                 w << QString::fromStdString(currentRoom->longDescription());
+                Item* i = &(currentRoom->itemsInRoom.at(location));
+                player->addItem(i);
             }
         }
     }

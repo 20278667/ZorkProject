@@ -7,6 +7,15 @@ Room::Room(string name, string description) {
 	this->description = description;
 }
 
+//shallow copy constructor
+Room::Room(const Room* r) {
+    name = r->name;
+    description = r->description;
+    exits = r->exits;
+    puzzle = r->puzzle;
+    itemsInRoom = r->itemsInRoom;
+}
+
 void Room::setExits(Room *north, Room *east, Room *south, Room *west) {
 	if (north != NULL)
 		exits["north"] = north;
@@ -20,7 +29,6 @@ void Room::setExits(Room *north, Room *east, Room *south, Room *west) {
 
 void Room::addPuzzle(Puzzle *i) {
     puzzle = i;
-    puzzle->Reset();
 }
 
 bool Room::hasPuzzle() {
@@ -55,6 +63,10 @@ void Room::addItem(Item *inItem) {
     itemsInRoom.push_back(*inItem);
 }
 
+void Room::removeItemFromRoom(int location) {
+    itemsInRoom.at(location).setHidden(true);
+}
+
 string Room::displayItem() {
     string tempString = "Items in room: ";
     int sizeItems = (itemsInRoom.size());
@@ -64,35 +76,28 @@ string Room::displayItem() {
     else if (itemsInRoom.size() > 0) {
         int x = (0);
         for (int n = sizeItems; n > 0; n--) {
-            tempString = tempString + itemsInRoom[x].getShortDescription() + ", " ;
-            x++;
+            if (!itemsInRoom[x].getHidden()) {
+                tempString = tempString + itemsInRoom[x].getShortDescription() + ", " ;
             }
+            x++;
         }
-    return tempString;
     }
+    return tempString;
+}
 
 int Room::numberOfItems() {
     return itemsInRoom.size();
 }
 
-int Room::isItemInRoom(string inString)
+int Room::isItemInRoom(string desc)
 {
-    int sizeItems = (itemsInRoom.size());
-    if (itemsInRoom.size() < 1) {
-        return false;
+    if (itemsInRoom.size() == 0) return 0;
+    else {
+        for (unsigned int i = 0; i < itemsInRoom.size(); i++) {
+            if (!itemsInRoom.at(i).getHidden() &&
+                    desc.compare(itemsInRoom.at(i).getShortDescription()) == 0) return i;
         }
-    else if (itemsInRoom.size() > 0) {
-       int x = (0);
-        for (int n = sizeItems; n > 0; n--) {
-            // compare inString with short description
-            int tempFlag = inString.compare( itemsInRoom[x].getShortDescription());
-            if (tempFlag == 0) {
-                itemsInRoom.erase(itemsInRoom.begin()+x);
-                return x;
-            }
-            x++;
-            }
-        }
+    }
     return -1;
 }
 

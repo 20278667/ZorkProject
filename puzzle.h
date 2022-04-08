@@ -15,6 +15,9 @@ public:
     virtual bool isCorrect() { return false; }
     virtual void tryInput(string) { };
     virtual vector<string> outputState() { return vector<string> {""}; }
+protected:
+    unsigned int totalGuesses;
+    //only classes that extend Puzzle can access totalGuesses now
 };
 
 #endif // PUZZLE_H

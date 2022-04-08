@@ -16,11 +16,12 @@ private:
 	string description;
 	map<string, Room*> exits;
 	string exitString();
-    vector <Item> itemsInRoom;
 
 public:
+    Room(const Room*);
     Puzzle* puzzle = NULL;
     int numberOfItems();
+    vector <Item> itemsInRoom;
     Room(string name, string description);
 	void setExits(Room *north, Room *east, Room *south, Room *west);
 	string shortDescription();
@@ -28,9 +29,9 @@ public:
 	Room* nextRoom(string direction);
     void addPuzzle(Puzzle*);
     bool hasPuzzle();
-    void addItem(Item *inItem);
+    void addItem(Item*);
     string displayItem();
-    int isItemInRoom(string inString);
+    int isItemInRoom(string);
     void removeItemFromRoom(int location);
 };
 

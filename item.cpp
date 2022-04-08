@@ -1,14 +1,22 @@
 #include "item.h"
 
-Item::Item (string inDescription, int inWeightGrams, float inValue/**, int weaponCheck*/) {
+Item::Item (string inDescription, int inWeightGrams, float inValue, bool hidden) {
 	description = inDescription;
 	setWeight(inWeightGrams);
 	value = inValue;
-	/**weaponCheck(isWeapon);*/
+    this->hidden = hidden;
 }
 
 Item::Item(string inDescription) {
 	description = inDescription;
+}
+
+//deep copy constructor
+Item::Item(const Item* old) {
+    description = string(old->description);
+    setWeight(old->weightGrams);
+    setValue(old->value);
+    setHidden(old->hidden);
 }
 
 void Item::setWeight(int inWeightGrams)
@@ -27,13 +35,14 @@ void Item::setValue(float inValue)
 	   value = inValue;
 }
 
-/**void Item::setWeaponCheck(int isWeapon)
+bool Item::getHidden() {
+    return hidden;
+}
+
+void Item::setHidden(bool hidden)
 {
-    if(isWeapon > 0 || isWeapon < 0)
-        cout << "Item not a weapon" ;
-    else
-        cout << "Item is a weapon" ;
-}*/
+    this->hidden = hidden;
+}
 
 string Item::getShortDescription()
 {
